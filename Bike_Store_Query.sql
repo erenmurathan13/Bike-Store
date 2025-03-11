@@ -100,6 +100,27 @@ FROM summary
 GROUP BY segment
 
 
+--Find stores that increased their revenue by more than 20% over the previous year, with store name, current year revenue and percentage of revenue increase.
+WITH store_revenue as(
+	SELECT YEAR(order_date)as date, s.store_name, SUM(list_price*quantity*(1-discount)) as revenue
+	FROM sales.order_items oi
+	INNER JOIN 
+	sales.orders o ON o.order_id=oi.order_id
+	INNER JOIN
+	sales.stores s ON s.store_id=o.store_id
+	GROUP BY YEAR(order_date), store_name
+	),
+
+change_data as(
+SELECT *, CAST(100*ROUND((revenue-LAG(revenue) OVER(PARTITION BY store_name ORDER BY date))/LAG(revenue) OVER(PARTITION BY store_name ORDER BY date),3) AS DECIMAL(10,2)) as change
+FROM store_revenue)
+
+SELECT date,store_name, FORMAT(revenue,'C', 'en-US') as revenue, CONCAT(change,'%') as change_pct
+FROM change_data
+WHERE change IS NOT NULL
+AND change>0.20
+
+
 
 
 
