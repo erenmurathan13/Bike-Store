@@ -1,15 +1,9 @@
---Retrieve the names and email addresses of all customers.
-SELECT product_name, category_name
-FROM production.products as pr
-INNER JOIN
-production.categories as cr ON pr.category_id=cr.category_id
-
 
 --Retrieve the names and email addresses of all customers.
 SELECT CONCAT(first_name,' ',last_name) as name, email
 FROM sales.customers
 
---Show the total number of orders placed.
+--Show the total number of orders placed by order status.
 SELECT COUNT(order_id) as total_order, order_status
 FROM sales.orders
 GROUP BY order_status
